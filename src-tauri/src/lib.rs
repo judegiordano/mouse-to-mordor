@@ -1,24 +1,19 @@
 use anyhow::Result;
 use mouse_position::mouse_position::Mouse;
-use serde_json::{json, Value};
 use std::sync::Arc;
 use std::time::Duration;
 use tauri::{Emitter, State};
-use tokio::sync::{mpsc, oneshot};
+use tokio::sync::{oneshot};
 
-use crate::app_config::{AppConfig, DistanceTraveled, APP_NAME, CONFIG_NAME};
+use crate::app_config::{APP_NAME, AppConfig, CONFIG_NAME, DistanceTraveled, Progress};
+use crate::constants::{FEET_IN_MILES, INCHES_IN_FEET, INCHES_IN_PIXELS};
 use crate::state::AppState;
 
 pub mod app_config;
 mod commands;
-pub mod rest_client;
 mod rtc;
 mod state;
-
-// conversions
-const INCHES_IN_PIXELS: f64 = 0.010417_f64;
-const INCHES_IN_FEET: f64 = 12.0_f64;
-const FEET_IN_MILES: f64 = 5280.0_f64;
+pub mod constants;
 
 #[tauri::command(rename_all = "snake_case")]
 async fn start_stream(
@@ -36,6 +31,7 @@ async fn start_stream(
     let config = state.config.clone();
 
     tokio::spawn(async move {
+				let progress = Progress::default();
         let config = config.clone();
         let mut interval = tokio::time::interval(Duration::from_millis(16));
         let mut rx = rx;
@@ -49,7 +45,7 @@ async fn start_stream(
         let mut last_emit = tokio::time::Instant::now();
         let mut last_store = tokio::time::Instant::now();
         let emit_interval = Duration::from_millis(200);
-        let store_interval = Duration::from_secs(5);
+        let store_interval = Duration::from_secs(1);
 
         loop {
             tokio::select! {
@@ -74,7 +70,11 @@ async fn start_stream(
 															};
 
 															if last_emit.elapsed() >= emit_interval {
-																	let _ = window.emit("distance-traveled", &distance_traveled);
+																let progress = Progress {
+																	distance_traveled: distance_traveled.clone(),
+																	..Default::default()
+																};
+																	let _ = window.emit("distance-traveled", progress);
 																	last_emit = tokio::time::Instant::now();
 															}
 

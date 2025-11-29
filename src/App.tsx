@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { listen, UnlistenFn } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
-import { DistanceTraveled } from "./types";
+import { Progress } from "./types";
+
+import Map from '/map.svg'
 
 export default function App() {
-	const [mousePosition, setMousePosition] = useState<DistanceTraveled | null>(null);
+	const [mousePosition, setMousePosition] = useState<Progress | null>(null);
 	const unlistenRef = useRef<UnlistenFn | null>(null);
 	const [streaming, setStreaming] = useState(false);
 
@@ -12,7 +14,7 @@ export default function App() {
 		if (streaming) return;
 		try {
 			await invoke("start_stream");
-			const unlistenMousePosition = await listen<DistanceTraveled>("distance-traveled", (event) => {
+			const unlistenMousePosition = await listen<Progress>("distance-traveled", (event) => {
 				setMousePosition(event.payload);
 			});
 			unlistenRef.current = unlistenMousePosition;
@@ -46,19 +48,34 @@ export default function App() {
 	}, [])
 
 	return (
-		<div className="p-6 max-w-7xl mx-auto flex flex-col gap-6">
-			<div>
-				{mousePosition?.total_pixels_traveled} pixels
-			</div>
-			<div>
-				{mousePosition?.total_inches_traveled} inches
-			</div>
-			<div>
-				{mousePosition?.total_feet_traveled} feet
-			</div>
-			<div>
-				{mousePosition?.total_miles_traveled} miles
-			</div>
+		<div
+			className="p-6 mx-auto flex flex-col h-screen gap-6 bg-amber-100"
+			style={{
+				backgroundImage: `url(${Map})`,
+				backgroundSize: "contain",
+				backgroundRepeat: "no-repeat",
+				backgroundPosition: "center",
+			}}
+		>
 		</div>
+
+		// <div className="p-6 max-w-7xl mx-auto flex flex-col gap-6">
+		// 	<div>
+		// 		<progress
+		// 			className="progress w-56"
+		// 			value={mousePosition?.distance_traveled.total_miles_traveled}
+		// 			max={mousePosition?.landmarks.total_walking_distance}>
+		// 		</progress>
+		// 	</div>
+		// 	<div>
+		// 		{mousePosition?.distance_traveled.total_inches_traveled} inches
+		// 	</div>
+		// 	<div>
+		// 		{mousePosition?.distance_traveled.total_feet_traveled} feet
+		// 	</div>
+		// 	<div>
+		// 		{mousePosition?.distance_traveled.total_miles_traveled} miles
+		// 	</div>
+		// </div>
 	);
 }
