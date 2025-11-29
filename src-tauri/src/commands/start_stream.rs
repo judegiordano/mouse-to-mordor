@@ -28,8 +28,12 @@ pub async fn run(window: tauri::Window, state: State<'_, Arc<AppState>>) -> Resu
 
         let mut last_position = (0i32, 0i32);
         let mut total_pixels_traveled = config.distance_traveled.total_pixels_traveled;
+        // TODO: clean up this mess
+        #[allow(unused)]
         let mut total_inches_traveled = config.distance_traveled.total_inches_traveled;
+        #[allow(unused)]
         let mut total_feet_traveled = config.distance_traveled.total_feet_traveled;
+        #[allow(unused)]
         let mut total_miles_traveled = config.distance_traveled.total_miles_traveled;
 
         let mut last_emit = tokio::time::Instant::now();
@@ -38,57 +42,60 @@ pub async fn run(window: tauri::Window, state: State<'_, Arc<AppState>>) -> Resu
         let store_interval = Duration::from_secs(1);
 
         loop {
+            // skip formatting for this branch cuz tokio macros breaks spacing :/
+            #[rustfmt::skip]
             tokio::select! {
                 _ = interval.tick() => {
-                    match Mouse::get_mouse_position() {
-                        Mouse::Position { x, y } => {
-                            let dx = (x - last_position.0) as f64;
-                            let dy = (y - last_position.1) as f64;
-                            let delta = (dx*dx + dy*dy).sqrt();
+										match Mouse::get_mouse_position() {
+											Mouse::Position { x, y } => {
+													let dx = (x - last_position.0) as f64;
+													let dy = (y - last_position.1) as f64;
+													let delta = (dx * dx + dy * dy).sqrt();
 
-                                                        if delta > 0.0 {
-                                                            total_pixels_traveled += delta;
-                                                            total_inches_traveled = (total_pixels_traveled * INCHES_IN_PIXELS).round();
-                                                            total_feet_traveled = (total_inches_traveled / INCHES_IN_FEET).round();
-                                                            total_miles_traveled = (total_feet_traveled / FEET_IN_MILES).round();
+													if delta > 0.0 {
+															total_pixels_traveled += delta;
+															total_inches_traveled =
+																	(total_pixels_traveled * INCHES_IN_PIXELS).round();
+															total_feet_traveled = (total_inches_traveled / INCHES_IN_FEET).round();
+															total_miles_traveled = (total_feet_traveled / FEET_IN_MILES).round();
 
-                                                            let distance_traveled = DistanceTraveled {
-                                                                            total_pixels_traveled: total_pixels_traveled.round(),
-                                                                            total_inches_traveled,
-                                                                            total_feet_traveled,
-                                                                            total_miles_traveled,
-                                                            };
+															let distance_traveled = DistanceTraveled {
+																	total_pixels_traveled: total_pixels_traveled.round(),
+																	total_inches_traveled,
+																	total_feet_traveled,
+																	total_miles_traveled,
+															};
 
-                                                            if last_emit.elapsed() >= emit_interval {
-                                                                    let progress = Progress {
-                                                                            distance_traveled: distance_traveled.clone(),
-                                                                            ..Default::default()
-                                                                    };
-                                                                    let _ = window.emit("distance-traveled", progress);
-                                                                    last_emit = tokio::time::Instant::now();
-                                                            }
+															if last_emit.elapsed() >= emit_interval {
+																	let progress = Progress {
+																			distance_traveled: distance_traveled.clone(),
+																			..Default::default()
+																	};
+																	let _ = window.emit("distance-traveled", progress);
+																	last_emit = tokio::time::Instant::now();
+															}
 
-                                                            if last_store.elapsed() >= store_interval {
-                                                                    let updates = AppConfig {
-                                                                                    distance_traveled: distance_traveled.clone(),
-                                                                                    ..config.clone()
-                                                                    };
-                                                                    tokio::task::spawn_blocking(move || {
-                                                                            if let Err(e) = confy::store(APP_NAME, CONFIG_NAME, updates) {
-                                                                                    eprintln!("error storing config: {}", e);
-                                                                            }
-                                                                    });
-                                                                    last_store = tokio::time::Instant::now();
-                                                            }
-                            }
+															if last_store.elapsed() >= store_interval {
+																	let updates = AppConfig {
+																			distance_traveled: distance_traveled.clone(),
+																			..config.clone()
+																	};
+																	tokio::task::spawn_blocking(move || {
+																			if let Err(e) = confy::store(APP_NAME, CONFIG_NAME, updates) {
+																					eprintln!("error storing config: {}", e);
+																			}
+																	});
+																	last_store = tokio::time::Instant::now();
+															}
+													}
 
-                            last_position.0 = x;
-                            last_position.1 = y;
-                        }
-                        Mouse::Error => {
-                            eprintln!("error getting mouse position");
-                        }
-                    }
+													last_position.0 = x;
+													last_position.1 = y;
+											}
+											Mouse::Error => {
+													eprintln!("error getting mouse position");
+											}
+                }
                 }
                 _ = &mut rx => {
                     break;
