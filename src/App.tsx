@@ -1,47 +1,45 @@
-import { useEffect, useRef, useState } from "react";
-import { listen, UnlistenFn } from "@tauri-apps/api/event";
-import { invoke } from "@tauri-apps/api/core";
-import { ExclamationCircleOutlined } from '@ant-design/icons';
-import { Button, Flex, Tooltip } from 'antd';
+import { useEffect, useRef, useState } from 'react'
+import { listen, UnlistenFn } from '@tauri-apps/api/event'
+import { invoke } from '@tauri-apps/api/core'
 
-import { Landmark, Progress } from "./types";
+import { Landmark, Progress } from './types'
 
 // import Map from '/map.svg'
 import Map from '/clean-map.webp'
 
 export default function App() {
-	const [mousePosition, setMousePosition] = useState<Progress | null>(null);
-	const unlistenRef = useRef<UnlistenFn | null>(null);
-	const [streaming, setStreaming] = useState(false);
+	const [mousePosition, setMousePosition] = useState<Progress | null>(null)
+	const unlistenRef = useRef<UnlistenFn | null>(null)
+	const [streaming, setStreaming] = useState(false)
 
 	async function startStream() {
-		if (streaming) return;
+		if (streaming) return
 		try {
-			await invoke("start_stream");
-			const unlistenMousePosition = await listen<Progress>("distance-traveled", (event) => {
-				setMousePosition(event.payload);
-			});
-			unlistenRef.current = unlistenMousePosition;
-			setStreaming(true);
+			await invoke('start_stream')
+			const unlistenMousePosition = await listen<Progress>('distance-traveled', (event) => {
+				setMousePosition(event.payload)
+			})
+			unlistenRef.current = unlistenMousePosition
+			setStreaming(true)
 		} catch (err) {
-			console.error("start_stream failed", err);
+			console.error('start_stream failed', err)
 		}
 	}
 
 	async function stopStream() {
-		if (!streaming) return;
+		if (!streaming) return
 		try {
-			await invoke("stop_stream");
+			await invoke('stop_stream')
 		} catch (err) {
-			console.error("stop_stream failed", err);
+			console.error('stop_stream failed', err)
 		}
 		if (unlistenRef.current) {
 			try {
-				unlistenRef.current();
+				unlistenRef.current()
 			} catch { }
-			unlistenRef.current = null;
+			unlistenRef.current = null
 		}
-		setStreaming(false);
+		setStreaming(false)
 	}
 
 	useEffect(() => {
@@ -59,13 +57,13 @@ export default function App() {
 			case 'THE_SHIRE_TO_BREE':
 				c = 'pt-44 pl-70'
 				rotate = 'rotate-50'
-				break;
+				break
 			case 'BREE_TO_RIVENDELL':
 				c = 'pt-62 pl-80'
 				rotate = 'rotate-60'
-				break;
+				break
 			default:
-				'';
+				break
 		}
 		return (
 			<div className={`absolute ${c}`}>
@@ -94,13 +92,13 @@ export default function App() {
 			className="mx-auto flex flex-col h-screen gap-6 bg-amber-100"
 			style={{
 				backgroundImage: `url(${Map})`,
-				backgroundSize: "contain",
-				backgroundRepeat: "no-repeat",
-				backgroundPosition: "center",
+				backgroundSize: 'contain',
+				backgroundRepeat: 'no-repeat',
+				backgroundPosition: 'center',
 			}}
 		>
 			{
-				mousePosition?.landmarks.map((landmark, key) => (
+				mousePosition?.landmarks.map((landmark) => (
 					<Progress landmark={landmark as unknown as [Landmark, number]} />
 					// <div>
 					// 	<p className="text-black font-bold">
@@ -150,29 +148,29 @@ export default function App() {
 		// 		{mousePosition?.distance_traveled.total_miles_traveled} miles
 		// 	</div>
 		// </div>
-	);
+	)
 }
 
 export function DiagonalProgress({
 	progress = 0,
 	strokeWidth = 8,
-	color = "#22C55E",
-	trailColor = "#E5E7EB",
-	className = "",
+	color = '#22C55E',
+	trailColor = '#E5E7EB',
+	className = '',
 	// bottom-left → top-right
-	pathD = "M 10 90 L 290 10"
+	pathD = 'M 10 90 L 290 10'
 }) {
-	const pathRef = useRef<SVGPathElement | null>(null);
-	const [len, setLen] = useState(0);
+	const pathRef = useRef<SVGPathElement | null>(null)
+	const [len, setLen] = useState(0)
 
 	useEffect(() => {
-		if (!pathRef.current) return;
-		const total = pathRef.current.getTotalLength();
-		setLen(total);
-	}, []);
+		if (!pathRef.current) return
+		const total = pathRef.current.getTotalLength()
+		setLen(total)
+	}, [])
 
-	const pct = Math.max(0, Math.min(progress, 100));
-	const offset = len - (len * pct) / 100;
+	const pct = Math.max(0, Math.min(progress, 100))
+	const offset = len - (len * pct) / 100
 
 	return (
 		<svg
@@ -195,8 +193,8 @@ export function DiagonalProgress({
 				strokeLinecap="round"
 				strokeDasharray={len}
 				strokeDashoffset={offset}
-				style={{ transition: "stroke-dashoffset 0.5s ease-out" }}
+				style={{ transition: 'stroke-dashoffset 0.5s ease-out' }}
 			/>
 		</svg>
-	);
+	)
 }
