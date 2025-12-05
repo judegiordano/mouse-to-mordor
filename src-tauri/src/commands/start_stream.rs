@@ -21,6 +21,12 @@ pub async fn run(window: tauri::Window, state: State<'_, Arc<AppState>>) -> Resu
     let win = window.clone();
     let config = state.config.clone();
 
+    let progress = Progress {
+        distance_traveled: config.distance_traveled.clone(),
+        ..Default::default()
+    };
+    let _ = window.emit("distance-traveled", progress);
+
     tokio::spawn(async move {
         let config = config.clone();
         let mut interval = tokio::time::interval(Duration::from_millis(16));
@@ -57,7 +63,7 @@ pub async fn run(window: tauri::Window, state: State<'_, Arc<AppState>>) -> Resu
 															total_inches_traveled =
 																	(total_pixels_traveled * INCHES_IN_PIXELS).round();
 															total_feet_traveled = (total_inches_traveled / INCHES_IN_FEET).round();
-															total_miles_traveled = (total_feet_traveled / FEET_IN_MILES).round();
+															total_miles_traveled = (total_feet_traveled / FEET_IN_MILES).floor();
 
 															let distance_traveled = DistanceTraveled {
 																	total_pixels_traveled: total_pixels_traveled.round(),

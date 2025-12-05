@@ -32,23 +32,38 @@ pub struct Landmarks {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Progress {
     pub distance_traveled: DistanceTraveled,
-    pub landmarks: Landmarks,
+    pub landmarks: Vec<(String, f64)>,
 }
 
 impl Default for Progress {
     fn default() -> Self {
         Self {
             distance_traveled: Default::default(),
-            landmarks: Landmarks {
-                the_shire_to_bree: THE_SHIRE_TO_BREE,
-                bree_to_rivendell: BREE_TO_RIVENDELL,
-                rivendell_to_lothlorien: RIVENDELL_TO_LOTHLORIEN,
-                lothlorien_to_parth_galen: LOTHLORIEN_TO_PARTH_GALEN,
-                parth_galen_to_the_black_gates: PARTH_GALEN_TO_THE_BLACK_GATES,
-                the_black_gates_to_minas_morgul: THE_BLACK_GATES_TO_MINAS_MORGUL,
-                minas_morgul_to_mount_doom: MINAS_MORGUL_TO_MOUNT_DOOM,
-                total_walking_distance: TOTAL_WALKING_DISTANCE,
-            },
+            landmarks: vec![
+                ("THE_SHIRE_TO_BREE".to_string(), THE_SHIRE_TO_BREE),
+                ("BREE_TO_RIVENDELL".to_string(), BREE_TO_RIVENDELL),
+                (
+                    "RIVENDELL_TO_LOTHLORIEN".to_string(),
+                    RIVENDELL_TO_LOTHLORIEN,
+                ),
+                (
+                    "LOTHLORIEN_TO_PARTH_GALEN".to_string(),
+                    LOTHLORIEN_TO_PARTH_GALEN,
+                ),
+                (
+                    "PARTH_GALEN_TO_THE_BLACK_GATES".to_string(),
+                    PARTH_GALEN_TO_THE_BLACK_GATES,
+                ),
+                (
+                    "THE_BLACK_GATES_TO_MINAS_MORGUL".to_string(),
+                    THE_BLACK_GATES_TO_MINAS_MORGUL,
+                ),
+                (
+                    "MINAS_MORGUL_TO_MOUNT_DOOM".to_string(),
+                    MINAS_MORGUL_TO_MOUNT_DOOM,
+                ),
+                ("TOTAL_WALKING_DISTANCE".to_string(), TOTAL_WALKING_DISTANCE),
+            ],
         }
     }
 }
