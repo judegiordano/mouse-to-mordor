@@ -6,7 +6,9 @@ import { invoke } from '@tauri-apps/api/core'
 import { Progress } from './types'
 
 import Map from './assets/map.svg?react'
-import Path from './assets/path.svg?react'
+// import Path from './assets/path.svg?react'
+import { Path } from './components/svgs/Path'
+import { cleanNumber } from './helpers'
 // import Map from '/clean-map.webp'
 
 export default function App() {
@@ -98,7 +100,11 @@ export default function App() {
 
 			<div className="relative w-screen h-screen overflow-hidden">
 				<Map className="absolute inset-0 w-full h-full" />
-				<Path className="absolute inset-0 w-full h-full" />
+				{/* <Map className="absolute inset-0 w-full h-full" /> */}
+				{/* <svg className="absolute inset-0 w-full h-full"> */}
+				<Path />
+				{/* </svg> */}
+				{/* <Path className="absolute inset-0 w-full h-full" /> */}
 			</div>
 
 			{/* {
@@ -120,13 +126,16 @@ export default function App() {
 
 			<div className="absolute bottom-0 text-black font-bold pb-10 pl-20 select-none">
 				<p>
-					{mousePosition?.distance_traveled.total_inches_traveled} inches
+					{cleanNumber(mousePosition?.distance_traveled?.total_inches_traveled as number)} inches
 				</p>
 				<p>
-					{mousePosition?.distance_traveled.total_feet_traveled} feet
+					{cleanNumber(mousePosition?.distance_traveled?.total_feet_traveled as number)} feet
 				</p>
 				<p>
-					{mousePosition?.distance_traveled.total_miles_traveled} mile{mousePosition?.distance_traveled.total_miles_traveled === 1 ? '' : 's'}
+					{cleanNumber(mousePosition?.distance_traveled?.total_miles_traveled as number)} / {cleanNumber(mousePosition?.landmarks[7][1] as number)} miles
+				</p>
+				<p>
+					progress: {((mousePosition?.distance_traveled?.total_miles_traveled as number / (mousePosition?.landmarks[7][1] ?? 0) as number) * 100).toFixed(2)}%
 				</p>
 			</div>
 			{/* <div className="pt-[220px]">
@@ -153,53 +162,5 @@ export default function App() {
 		// 		{mousePosition?.distance_traveled.total_miles_traveled} miles
 		// 	</div>
 		// </div>
-	)
-}
-
-export function DiagonalProgress({
-	progress = 0,
-	strokeWidth = 8,
-	color = '#22C55E',
-	trailColor = '#E5E7EB',
-	className = '',
-	// bottom-left → top-right
-	pathD = 'M 10 90 L 290 10'
-}) {
-	const pathRef = useRef<SVGPathElement | null>(null)
-	const [len, setLen] = useState(0)
-
-	useEffect(() => {
-		if (!pathRef.current) return
-		const total = pathRef.current.getTotalLength()
-		setLen(total)
-	}, [])
-
-	const pct = Math.max(0, Math.min(progress, 100))
-	const offset = len - (len * pct) / 100
-
-	return (
-		<svg
-			width="100%"
-			height="120"
-			viewBox="0 0 300 100"
-			className={className}
-		>
-			<path
-				d={pathD}
-				stroke={trailColor}
-				strokeWidth={strokeWidth}
-				strokeLinecap="round"
-			/>
-			<path
-				ref={pathRef}
-				d={pathD}
-				stroke={color}
-				strokeWidth={strokeWidth}
-				strokeLinecap="round"
-				strokeDasharray={len}
-				strokeDashoffset={offset}
-				style={{ transition: 'stroke-dashoffset 0.5s ease-out' }}
-			/>
-		</svg>
 	)
 }

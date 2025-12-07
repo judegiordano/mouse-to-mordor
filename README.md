@@ -19,3 +19,5 @@ npm run tauri dev
 - add LOTR font
 - store last result in FE cache zustand
 - fix total metrics to be in a reasonable readable spot
+- background color should not be flat color but gradient
+- get over the air updater working

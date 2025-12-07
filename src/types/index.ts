@@ -27,5 +27,5 @@ export type Landmark = 'THE_SHIRE_TO_BREE' |
 
 export type Progress = {
 	distance_traveled: DistanceTraveled
-	landmarks: [Landmark, number]
+	landmarks: [Landmark, number][]
 }
