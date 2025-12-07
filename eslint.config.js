@@ -21,8 +21,8 @@ export default defineConfig([
 		},
 		rules: {
 			'react/jsx-uses-react': 'warn',
-			'react/jsx-uses-vars': 'warn',
-			'no-unused-vars': 'warn',
+			'react/jsx-uses-vars': 'off',
+			'no-unused-vars': 'off',
 			'no-undef': 'warn',
 			'quotes': [
 				'warn',

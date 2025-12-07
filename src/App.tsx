@@ -1,11 +1,13 @@
+/// <reference types="vite-plugin-svgr/client" />
 import { useEffect, useRef, useState } from 'react'
 import { listen, UnlistenFn } from '@tauri-apps/api/event'
 import { invoke } from '@tauri-apps/api/core'
 
-import { Landmark, Progress } from './types'
+import { Progress } from './types'
 
-// import Map from '/map.svg'
-import Map from '/clean-map.webp'
+import Map from './assets/map.svg?react'
+import Path from './assets/path.svg?react'
+// import Map from '/clean-map.webp'
 
 export default function App() {
 	const [mousePosition, setMousePosition] = useState<Progress | null>(null)
@@ -49,55 +51,57 @@ export default function App() {
 		}
 	}, [])
 
-	function Progress({ landmark }: { landmark: [Landmark, number] }) {
-		const [name, distance] = landmark
-		let c = ''
-		let rotate = ''
-		switch (name) {
-			case 'THE_SHIRE_TO_BREE':
-				c = 'pt-44 pl-70'
-				rotate = 'rotate-50'
-				break
-			case 'BREE_TO_RIVENDELL':
-				c = 'pt-62 pl-80'
-				rotate = 'rotate-60'
-				break
-			default:
-				break
-		}
-		return (
-			<div className={`absolute ${c}`}>
-				{/* rotate-310 */}
-				<p className="text-black font-bold select-none">{name.split('_').join(' ')}</p>
-				{/* <button onClick={() => alert()}>
-					<ExclamationCircleOutlined style={{ color: 'black' }} />
-				</button> */}
-
-				{/* <Tooltip title="search">
-					<Button type="secondary" shape="circle" icon={<ExclamationCircleOutlined style={{ color: 'black' }} />} />
-				</Tooltip> */}
-
-				<progress
-					className={`progress progress-neutral w-20 ${rotate}`}
-					value={mousePosition?.distance_traveled.total_miles_traveled}
-					max={distance}
-				/>
-			</div>
-		)
-		return <></>
-	}
+	// function Progress({ landmark }: { landmark: [Landmark, number] }) {
+	// 	const [name, distance] = landmark
+	// 	let c = ''
+	// 	let rotate = ''
+	// 	switch (name) {
+	// 		case 'THE_SHIRE_TO_BREE':
+	// 			c = 'pt-44 pl-70'
+	// 			rotate = 'rotate-50'
+	// 			break
+	// 		case 'BREE_TO_RIVENDELL':
+	// 			c = 'pt-62 pl-80'
+	// 			rotate = 'rotate-60'
+	// 			break
+	// 		default:
+	// 			break
+	// 	}
+	// 	return (
+	// 		<div className={`absolute ${c}`}>
+	// 			<p className="text-black font-bold select-none">{name.split('_').join(' ')}</p>
+	// 			<progress
+	// 				className={`progress progress-neutral w-20 ${rotate}`}
+	// 				value={mousePosition?.distance_traveled.total_miles_traveled}
+	// 				max={distance}
+	// 			/>
+	// 		</div>
+	// 	)
+	// 	return <></>
+	// }
 
 	return (
 		<div
 			className="mx-auto flex flex-col h-screen gap-6 bg-amber-100"
-			style={{
-				backgroundImage: `url(${Map})`,
-				backgroundSize: 'contain',
-				backgroundRepeat: 'no-repeat',
-				backgroundPosition: 'center',
-			}}
+		// style={{
+		// 	// backgroundImage: `url(${Map})`,
+		// 	backgroundSize: 'contain',
+		// 	backgroundRepeat: 'no-repeat',
+		// 	backgroundPosition: 'center',
+		// }}
 		>
-			{
+
+			{/* <div className="relative w-full h-full">
+				<Map className="absolute inset-0 w-full h-full object-contain" />
+				<Path className="absolute inset-0 w-full h-full object-contain" />
+			</div> */}
+
+			<div className="relative w-screen h-screen overflow-hidden">
+				<Map className="absolute inset-0 w-full h-full" />
+				<Path className="absolute inset-0 w-full h-full" />
+			</div>
+
+			{/* {
 				mousePosition?.landmarks.map((landmark) => (
 					<Progress landmark={landmark as unknown as [Landmark, number]} />
 					// <div>
@@ -112,7 +116,8 @@ export default function App() {
 					// 	</progress>
 					// </div>
 				))
-			}
+			} */}
+
 			<div className="absolute bottom-0 text-black font-bold pb-10 pl-20 select-none">
 				<p>
 					{mousePosition?.distance_traveled.total_inches_traveled} inches

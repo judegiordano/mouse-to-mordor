@@ -12,13 +12,13 @@
   "app": {
     "windows": [
       {
-        "resizable": false,
+        "resizable": true,
         "title": "Mouse to Mordor",
         "focus": true,
         "width": 1200,
         "height": 1000,
         "fullscreen": false,
-        "maximizable": false
+        "maximizable": true
       }
     ],
     "security": {
