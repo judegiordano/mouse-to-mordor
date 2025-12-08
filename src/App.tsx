@@ -1,12 +1,11 @@
 /// <reference types="vite-plugin-svgr/client" />
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { listen, UnlistenFn } from '@tauri-apps/api/event'
 import { invoke } from '@tauri-apps/api/core'
 
 import { Progress } from './types'
 
-import Map from './assets/map.svg?react'
-import Path from './assets/path.svg?react'
+import mordorPathSvg from './assets/mordorPath.svg?raw'
 // import Map from '/clean-map.webp'
 
 export default function App() {
@@ -97,8 +96,11 @@ export default function App() {
 			</div> */}
 
 			<div className="relative w-screen h-screen overflow-hidden">
-				<Map className="absolute inset-0 w-full h-full" />
-				<Path className="absolute inset-0 w-full h-full" />
+				<AnimatedMordorPath
+					svgContent={mordorPathSvg}
+					progress={mousePosition?.distance_traveled.total_inches_traveled || 0}
+					maxDistance={(mousePosition?.landmarks.find(([name]) => name === 'TOTAL_WALKING_DISTANCE')?.[1] || 1779) * 63360} // maybe calc percentage on backend to pass in directly
+				/>
 			</div>
 
 			{/* {
@@ -153,6 +155,59 @@ export default function App() {
 		// 		{mousePosition?.distance_traveled.total_miles_traveled} miles
 		// 	</div>
 		// </div>
+	)
+}
+
+function AnimatedMordorPath({
+	svgContent,
+	progress = 0,
+	maxDistance = 1779,
+}: {
+	svgContent: string
+	progress: number
+	maxDistance: number
+}) {
+	const containerRef = useRef<HTMLDivElement | null>(null)
+	const pathLengthRef = useRef<number>(0)
+	const maskPathRef = useRef<SVGPathElement | null>(null)
+
+	useEffect(() => {
+		if (!containerRef.current || maskPathRef.current) return
+
+		containerRef.current.innerHTML = svgContent
+
+		const maskPath = containerRef.current.querySelector('#pathMask') as SVGPathElement
+		if (maskPath) {
+			maskPathRef.current = maskPath
+			pathLengthRef.current = maskPath.getTotalLength()
+			console.log('Initialized - Path length:', pathLengthRef.current)
+		}
+	}, [svgContent])
+
+	useLayoutEffect(() => {
+		if (!maskPathRef.current || pathLengthRef.current === 0) return
+
+		// update these values locally to see faster progress.
+		// progress = progress * 1000
+		const progressPercent = Math.max(0, Math.min(progress / maxDistance, 1))
+		const offset = pathLengthRef.current * (1 - progressPercent)
+
+		maskPathRef.current.style.strokeDasharray = `${pathLengthRef.current}`
+		maskPathRef.current.style.strokeDashoffset = `${offset}`
+
+		console.log('Updated:', {
+			progress,
+			maxDistance,
+			progressPercent: (progressPercent * 100).toFixed(1) + '%',
+			offset: offset.toFixed(1)
+		})
+	}, [progress, maxDistance])
+
+	return (
+		<div
+			ref={containerRef}
+			className="absolute inset-0 w-full h-full"
+		/>
 	)
 }
 
