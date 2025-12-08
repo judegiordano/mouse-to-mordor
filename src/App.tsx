@@ -99,7 +99,7 @@ export default function App() {
 				<AnimatedMordorPath
 					svgContent={mordorPathSvg}
 					progress={mousePosition?.distance_traveled.total_inches_traveled || 0}
-					maxDistance={(mousePosition?.landmarks.find(([name]) => name === 'TOTAL_WALKING_DISTANCE')?.[1] || 1779) * 63360} // maybe calc percentage on backend to pass in directly
+					maxDistance={(mousePosition?.landmarks.find(([name]) => name === 'TOTAL_WALKING_DISTANCE')?.[1] || 1779) * 63360} // in inches, could calc by feet for better performance, or even miles if it breaks down small enough
 				/>
 			</div>
 
